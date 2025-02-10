@@ -1,15 +1,16 @@
 package vm
 
 import (
+	"asyncKubeManager/pkg/model"
 	"context"
 	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
-// GenerateVMName generates a VirtualMachine name based on the given prefix.
-func GenerateVMName(prefix string) string {
-	return fmt.Sprintf("%s-vm", prefix)
+// GenerateVMNameFromVMModel generates a VirtualMachine name based on the given prefix.
+func GenerateVMNameFromVMModel(vm *model.VM) string {
+	return fmt.Sprintf("%s-%s", vm.VMName, vm.UID)
 }
 
 // CheckVMExists checks if a VirtualMachine exists in the specified namespace.
@@ -19,4 +20,9 @@ func CheckVMExists(ctx context.Context, client *kubernetes.Clientset, namespace,
 		return false, err
 	}
 	return true, nil
+}
+
+// GenerateDataValumName generates a PVC name based on the VM name.
+func GenerateDataValumName(vmName string) string {
+	return fmt.Sprintf("%s-dv", vmName)
 }

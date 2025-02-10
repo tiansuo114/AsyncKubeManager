@@ -18,7 +18,7 @@ type VMMonitor interface {
 	MonitorVMs(ctx context.Context, namespace string, vmNames *[]string, interval time.Duration, wg *sync.WaitGroup)
 }
 
-// KubevirtVMMonitor implements the VMMonitor interface using the Kubernetes client.
+// KubevirtVMMonitor implements the VMMonitor interface using the Kubernetes kubeVirtClientSet.
 type KubevirtVMMonitor struct {
 	Client *kubernetes.Clientset
 }

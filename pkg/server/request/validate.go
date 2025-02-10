@@ -1,9 +1,9 @@
 package request
 
 import (
+	"asyncKubeManager/pkg/i18n"
+	"asyncKubeManager/pkg/server/errutil"
 	"context"
-	"cspm/pkg/i18n"
-	"cspm/pkg/server/errutil"
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/locales/zh"
 	ut "github.com/go-playground/universal-translator"

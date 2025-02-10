@@ -2,23 +2,26 @@ package dao
 
 import (
 	"context"
+	"errors"
 	"gorm.io/gorm"
 	"time"
 
 	"asyncKubeManager/pkg/dbresolver"
 	"asyncKubeManager/pkg/model"
 	"asyncKubeManager/pkg/token"
-	"asyncKubeManager/pkg/utils"
 )
 
-func InsertUser(ctx context.Context, dbResolver *dbresolver.DBResolver, username, tel, email, desc string) (*model.User, error) {
+func InsertUser(ctx context.Context, dbResolver *dbresolver.DBResolver, uid, username, tel, email, desc string, role model.UserRole) (*model.User, error) {
 	db := dbResolver.GetDB()
+	return InsertUserWithDB(ctx, db, uid, username, tel, email, desc, role)
+}
 
+func InsertUserWithDB(ctx context.Context, db *gorm.DB, uid, username, tel, email, desc string, role model.UserRole) (*model.User, error) {
 	creator := token.GetUIDFromCtx(ctx)
 	user := model.User{
-		UID:      utils.NextID(),
+		UID:      uid,
 		Username: username,
-		Role:     model.Normal,
+		Role:     role,
 		Primary:  false,
 		Tel:      tel,
 		Email:    email,
@@ -32,26 +35,38 @@ func InsertUser(ctx context.Context, dbResolver *dbresolver.DBResolver, username
 	return &user, err
 }
 
-func GetUserByUID(ctx context.Context, dbResolver *dbresolver.DBResolver, uid string) (*model.User, error) {
+func GetUserByUID(ctx context.Context, dbResolver *dbresolver.DBResolver, uid string) (bool, *model.User, error) {
 	db := dbResolver.GetDB()
 	return GetUserByUIDWithDB(ctx, db, uid)
 }
 
-func GetUserByUIDWithDB(ctx context.Context, db *gorm.DB, uid string) (*model.User, error) {
+func GetUserByUIDWithDB(ctx context.Context, db *gorm.DB, uid string) (bool, *model.User, error) {
 	u := model.User{}
 	err := db.WithContext(ctx).Model(&u).Where("uid = ?", uid).First(&u).Error
-	return &u, err
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil, nil
+		}
+		return false, nil, err
+	}
+	return true, &u, err
 }
 
-func GetUserByUserName(ctx context.Context, dbResolver *dbresolver.DBResolver, username string) (*model.User, error) {
+func GetUserByUserName(ctx context.Context, dbResolver *dbresolver.DBResolver, username string) (bool, *model.User, error) {
 	db := dbResolver.GetDB()
 	return GetUserByUserNameWithDB(ctx, db, username)
 }
 
-func GetUserByUserNameWithDB(ctx context.Context, db *gorm.DB, username string) (*model.User, error) {
+func GetUserByUserNameWithDB(ctx context.Context, db *gorm.DB, username string) (bool, *model.User, error) {
 	u := model.User{}
 	err := db.WithContext(ctx).Model(&u).Where("username = ?", username).First(&u).Error
-	return &u, err
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil, nil
+		}
+		return false, nil, err
+	}
+	return true, &u, err
 }
 
 func DeleteUserByID(ctx context.Context, dbResolver *dbresolver.DBResolver, uid string) error {
@@ -89,4 +104,56 @@ func ChangeUserRole(ctx context.Context, dbResolver *dbresolver.DBResolver, uid 
 	return UpdateUserByID(ctx, dbResolver, uid, map[string]interface{}{
 		"role": role,
 	})
+}
+
+// InsertUserOperatorLog inserts a new user operation log into the database.
+func InsertUserOperatorLog(ctx context.Context, dbResolver *dbresolver.DBResolver, uid string, operator model.UserOperatorType) (*model.UserOperatorLog, error) {
+	db := dbResolver.GetDB()
+	return InsertUserOperatorLogWithDB(ctx, db, uid, operator)
+}
+
+func InsertUserOperatorLogWithDB(ctx context.Context, db *gorm.DB, uid string, operator model.UserOperatorType) (*model.UserOperatorLog, error) {
+	creator := token.GetUIDFromCtx(ctx)
+	log := model.UserOperatorLog{
+		UID:       uid,
+		Operator:  operator,
+		CreatedAt: time.Now().UnixMilli(),
+		Creator:   creator,
+	}
+
+	err := db.WithContext(ctx).Create(&log).Error
+	return &log, err
+}
+
+func InsertUserOperatorLogByModel(ctx context.Context, dbResolver *dbresolver.DBResolver, log *model.UserOperatorLog) error {
+	db := dbResolver.GetDB()
+	return InsertUserOperatorLogByModelWithDB(ctx, db, log)
+}
+
+func InsertUserOperatorLogByModelWithDB(ctx context.Context, db *gorm.DB, log *model.UserOperatorLog) error {
+	return db.WithContext(ctx).Create(log).Error
+}
+
+// GetUserOperatorLogsByUID retrieves all user operation logs for a specific user by UID.
+func GetUserOperatorLogsByUID(ctx context.Context, dbResolver *dbresolver.DBResolver, uid string) ([]model.UserOperatorLog, error) {
+	db := dbResolver.GetDB()
+	var logs []model.UserOperatorLog
+	err := db.WithContext(ctx).Where("uid = ?", uid).Find(&logs).Error
+	return logs, err
+}
+
+// GetUserOperatorLogByID retrieves a user operation log by its ID.
+func GetUserOperatorLogByID(ctx context.Context, dbResolver *dbresolver.DBResolver, id int64) (*model.UserOperatorLog, error) {
+	db := dbResolver.GetDB()
+	log := model.UserOperatorLog{}
+	err := db.WithContext(ctx).Where("id = ?", id).First(&log).Error
+	return &log, err
+}
+
+// ListUserOperatorLogs retrieves all user operation logs.
+func ListUserOperatorLogs(ctx context.Context, dbResolver *dbresolver.DBResolver) ([]model.UserOperatorLog, error) {
+	db := dbResolver.GetDB()
+	var logs []model.UserOperatorLog
+	err := db.WithContext(ctx).Find(&logs).Error
+	return logs, err
 }

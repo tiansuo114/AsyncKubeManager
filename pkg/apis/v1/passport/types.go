@@ -1,5 +1,7 @@
 package passport
 
+import "asyncKubeManager/pkg/model"
+
 type (
 	loginReq struct {
 		UserID       string `json:"user_id" validate:"required"`
@@ -18,7 +20,13 @@ type (
 		Image     string `json:"image"`
 	}
 
-	registerLicenseReq struct {
-		License string `json:"license"`
+	updateUserReq struct {
+		UID      string         `json:"uid" validate:"required"`
+		Username string         `json:"username" validate:"required,gt=0,lte=50"`
+		Email    string         `json:"email" validate:"email"`
+		Tel      string         `json:"tel" validate:"omitempty"`
+		Desc     string         `json:"desc" validate:"omitempty"`
+		Password string         `json:"password" validate:"omitempty,min=6"` // Optional password field
+		Role     model.UserRole `json:"role" validate:"omitempty"`
 	}
 )

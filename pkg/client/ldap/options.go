@@ -14,6 +14,7 @@ const (
 	ldapPort     = "ldap-port"
 	ldapUserName = "ldap-user-name"
 	ldapPassword = "ldap-password"
+	ldapBaseDN   = "ldap-base-dn"
 )
 
 type DefaultOption func(o *Options)
@@ -80,6 +81,7 @@ func (o *Options) loadEnv() {
 	o.Port = o.v.GetInt(ldapPort)                // Get LDAP port configuration
 	o.LDAPUserName = o.v.GetString(ldapUserName) // Get LDAP username configuration
 	o.LDAPPassword = o.v.GetString(ldapPassword) // Get LDAP password configuration
+	o.BaseDN = o.v.GetString(ldapBaseDN)
 }
 
 // Validate checks the validity of configuration items
@@ -100,9 +102,8 @@ func (o *Options) Validate() []error {
 		errors = append(errors, fmt.Errorf("invalid ldap user name"))
 	}
 
-	// Validate password
-	if o.LDAPPassword == "" {
-		errors = append(errors, fmt.Errorf("ldap password is empty"))
+	if o.BaseDN == "" {
+		errors = append(errors, fmt.Errorf("ldap base dn is empty"))
 	}
 
 	return errors
@@ -114,6 +115,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	fs.IntVar(&o.Port, ldapPort, o.Port, "ldap port")
 	fs.StringVar(&o.LDAPUserName, ldapUserName, o.LDAPUserName, "ldap user name")
 	fs.StringVar(&o.LDAPPassword, ldapPassword, o.LDAPPassword, "ldap password")
+	fs.StringVar(&o.BaseDN, ldapBaseDN, o.BaseDN, "ldap base dn")
 
 	// Bind command-line flags
 	_ = o.v.BindPFlags(fs)

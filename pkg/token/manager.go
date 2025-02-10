@@ -1,17 +1,18 @@
 package token
 
 import (
+	"asyncKubeManager/pkg/model"
 	"context"
 	"time"
 )
 
 // Info describes a user that has been authenticated to the system.
 type Info struct {
-	UID      string `json:"uid,omitempty"`
-	Username string `json:"username,omitempty"`
-	Name     string `json:"name,omitempty"`
-	RoleID   int64  `json:"role_id,omitempty"`
-	Primary  bool   `json:"primary,omitempty"`
+	UID      string         `json:"uid,omitempty"`
+	Username string         `json:"username,omitempty"`
+	Name     string         `json:"name,omitempty"`
+	RoleID   model.UserRole `json:"user_role,omitempty"`
+	Primary  bool           `json:"primary,omitempty"`
 	// DataAuth []int64 `json:"data_auth,omitempty"`
 }
 

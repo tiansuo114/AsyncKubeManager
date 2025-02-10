@@ -4,8 +4,8 @@ import "gorm.io/gorm"
 
 type User struct {
 	ID        int64      `gorm:"primary_key;AUTO_INCREMENT"`
-	UID       string     `gorm:"not null; index:uniq_uid,unique; type:varchar(32)"`
-	Username  string     `gorm:"not null; index:idx_username; type:varchar(32)"`
+	UID       string     `gorm:"not null; index:uid,unique; type:varchar(32)"`
+	Username  string     `gorm:"not null; index:username; type:varchar(32)"`
 	Role      UserRole   `gorm:"not null"`
 	Primary   bool       `gorm:"not null"`
 	Tel       string     `gorm:"not null; type:varchar(32)"`
@@ -21,8 +21,8 @@ type User struct {
 type UserRole string
 
 const (
-	Admin  UserRole = "admin"
-	Normal UserRole = "normal"
+	UserRoleAdmin  UserRole = "admin"
+	UserRoleNormal UserRole = "normal"
 )
 
 type UserStatus string
@@ -40,7 +40,7 @@ func (User) TableName() string {
 }
 
 var DefaultUser = User{
-	Role:     Normal,
+	Role:     UserRoleNormal,
 	Status:   UserStatusEnabled,
 	Primary:  true,
 	UID:      "",
@@ -51,9 +51,23 @@ var DefaultUser = User{
 }
 
 type UserOperatorLog struct {
-	ID        int64  `gorm:"primary_key;AUTO_INCREMENT"`
-	UID       string `gorm:"not null; index:uid"`
-	Operator  string `gorm:"not null; type:varchar(255)"`
-	CreatedAt int64  `gorm:"autoCreateTime:milli; not null; index:idx_created_at"`
-	Creator   string `gorm:"not null; type:varchar(32)"`
+	ID        int64            `gorm:"primary_key;AUTO_INCREMENT"`
+	UID       string           `gorm:"not null; index:uid"`
+	Operator  UserOperatorType `gorm:"not null; type:varchar(255)"`
+	Operation string           `gorm:"not null; type:varchar(255)"`
+	CreatedAt int64            `gorm:"autoCreateTime:milli; not null; index:idx_created_at"`
+	Creator   string           `gorm:"not null; type:varchar(32)"`
+}
+
+type UserOperatorType string
+
+const (
+	UserOperatorLogin      UserOperatorType = "login"
+	UserOperatorFirstLogin UserOperatorType = "first_login"
+	UserOperatorUpdate     UserOperatorType = "update"
+	UserOperatorError      UserOperatorType = "error"
+)
+
+func (UserOperatorLog) TableName() string {
+	return "user_operator_logs"
 }

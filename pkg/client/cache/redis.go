@@ -18,7 +18,7 @@ func NewRedisClient(option *Options, stopCh <-chan struct{}) (Interface, error) 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var r Client
+	var r *Client
 	redisOptions := &redis.Options{
 		Addr:     option.Host,
 		Password: option.Password,
@@ -40,7 +40,7 @@ func NewRedisClient(option *Options, stopCh <-chan struct{}) (Interface, error) 
 		}
 	}()
 
-	return &r, nil
+	return r, nil
 }
 
 func NewFailoverRedisClient(option *Options, stopCh <-chan struct{}) (Interface, error) {

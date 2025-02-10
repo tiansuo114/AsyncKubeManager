@@ -1,6 +1,7 @@
 package token
 
 import (
+	"asyncKubeManager/pkg/model"
 	"context"
 	"fmt"
 	"go.uber.org/zap"
@@ -41,17 +42,27 @@ func PayloadFromCtx(ctx context.Context) (Info, error) {
 func GetUIDFromCtx(ctx context.Context) string {
 	payload, err := PayloadFromCtx(ctx)
 	if err != nil {
-		zap.L().Warn("GetUIDFromCtx 解析token错误", zap.Error(err))
+		zap.L().Warn("GetUIDFromCtx ", zap.Error(err))
 		return ""
 	}
 
 	return payload.UID
 }
 
+func GetUserRoleFromCtx(ctx context.Context) model.UserRole {
+	payload, err := PayloadFromCtx(ctx)
+	if err != nil {
+		zap.L().Warn("GetUserRoleFromCtx parsing token error", zap.Error(err))
+		return ""
+	}
+
+	return payload.RoleID
+}
+
 func GetNameFromCtx(ctx context.Context) string {
 	payload, err := PayloadFromCtx(ctx)
 	if err != nil {
-		zap.L().Warn("GetNameFromCtx 解析token错误", zap.Error(err))
+		zap.L().Warn("GetNameFromCtx parsing token error", zap.Error(err))
 		return ""
 	}
 	return payload.Name
@@ -59,7 +70,7 @@ func GetNameFromCtx(ctx context.Context) string {
 func GetUserNameFromCtx(ctx context.Context) string {
 	payload, err := PayloadFromCtx(ctx)
 	if err != nil {
-		zap.L().Warn("GetNameFromCtx 解析token错误", zap.Error(err))
+		zap.L().Warn("GetNameFromCtx parsing token error", zap.Error(err))
 		return ""
 	}
 	return payload.Username
@@ -68,7 +79,7 @@ func GetUserNameFromCtx(ctx context.Context) string {
 func PrimaryFromCtx(ctx context.Context) bool {
 	payload, err := PayloadFromCtx(ctx)
 	if err != nil {
-		zap.L().Warn("PrimaryFromCtx 解析token错误", zap.Error(err))
+		zap.L().Warn("PrimaryFromCtx parsing token error", zap.Error(err))
 		return false
 	}
 

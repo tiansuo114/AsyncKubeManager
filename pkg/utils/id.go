@@ -16,8 +16,6 @@ var (
 const max = 1<<16 - 1
 
 func init() {
-	// 有一定的几率会产生相同的machineID
-	// 比如两个引用这个包的实例，在同一个微秒被创建...
 	st := sonyflake.Settings{
 		StartTime: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 		MachineID: func() (uint16, error) {

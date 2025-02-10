@@ -1,8 +1,8 @@
 package request
 
 import (
+	"asyncKubeManager/pkg/i18n"
 	"context"
-	"cspm/pkg/i18n"
 	"testing"
 )
 
